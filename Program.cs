@@ -3,19 +3,45 @@ int boardSize = 9;
 int placeSize = 2; 
 int visibleMaxNumber = 8; 
 int emptyPlaceIndex = 8; 
-char[,] board = fillBoard(createBoard(boardSize, placeSize), visibleMaxNumber); 
+char[,] board = fillBoard(createBoard(boardSize, placeSize), visibleMaxNumber);
 
-Console.WriteLine("\nSet this correct pattern to win:\n\n> 123\n> 456\n> 78  \n\nThis is your playboard:\n");
+Console.WriteLine(@"> > > > > > > > > > > > > > > > >
+> Set this correct pattern to win:
+> 123
+> 456
+> 78
+
+> Numbers can be moved by putting them on the empty place. 
+> You can choose one number from numbers around the empty place and type it. 
+> Then the number will change its place.
+> > > > > > > > > > > > > > > > >
+
+This is your playboard:");
+
 while(!gameControl(board, controlSequence)) {
     setAvailability(board, emptyPlaceIndex);
     showBoard(board);
     Console.WriteLine("\nType a number to make your move:");
-    char number = Convert.ToChar(Console.ReadLine());
-    emptyPlaceIndex = setEmptyPlace(board, emptyPlaceIndex, number);
-    resetAvailability(board);
-    Console.WriteLine();
+    try {
+        char number = Convert.ToChar(Console.ReadLine());
+        if(validUserInput(board, controlSequence, number)) {
+            emptyPlaceIndex = setEmptyPlace(board, emptyPlaceIndex, number);
+            resetAvailability(board);
+        }
+        Console.WriteLine();
+    } catch (Exception e) {
+        Console.WriteLine("\nType a number from 1-8 range which can be moved!");
+        Console.WriteLine();
+    }
 }
-Console.WriteLine("\nCongratulations!\n123\n456\n789\nYou won!");
+Console.WriteLine(@"> > > > > > > > > > > > > > > > >
+>Congratulations! 
+>123
+>456
+>78
+
+You won!
+> > > > > > > > > > > > > > > > >");
 
 char[,] createBoard(int outsideLength, int innerLength) { 
     return new char[outsideLength, innerLength];
@@ -105,6 +131,35 @@ void showBoard(char[,] board) {
             Console.WriteLine();
         }
     }
+}
+
+bool validUserInput(char[,] board, string controlSequence, char c) {
+    string validInputs = "";
+    bool inputStatus = true;
+    if(!controlSequence[..^1].Contains(c)) {
+        inputStatus = false;
+    } else {
+        for(int i = 0; i < board.GetLength(0); i++) {
+            if(board[i, 1] == c) {
+                if(board[i, 0] == '0') {
+                    inputStatus = false;
+                    break;
+                } else {
+                    return true;
+                }
+            }   
+        }
+    }
+    for(int j = 0; j < board.GetLength(0); j++) {
+        if(board[j, 0] == '1') {
+            validInputs += " " + board[j, 1] + ",";
+        }
+    }
+    validInputs = validInputs[..^1];
+    if(!inputStatus) {
+        Console.WriteLine($"\n'{c}' is not valid input.\nValid inputs for this turn are:{validInputs}.");
+    }
+    return inputStatus;
 }
 
 //runTests();
